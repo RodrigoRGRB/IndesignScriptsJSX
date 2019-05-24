@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.external.ExternalInterface;
+			
+			import mx.charts.chartClasses.InstanceCache;
+			import mx.collections.ArrayCollection;
+			import mx.collections.HierarchicalData;
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.controls.Alert;
+			import mx.controls.DataGrid;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IUIComponent;
+			import mx.events.CloseEvent;
+			import mx.events.DragEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.TreeEvent;
+			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
+			import mx.messaging.messages.ErrorMessage;
+			import mx.utils.ArrayUtil;
+			
+			var xml:XML =
+				<LIVRO>
+				<INFORMACOES><ARQUIVO>\\rede-sj\usuarios\Lucas.ribeiro\Desktop\Teste.indd</ARQUIVO>
+				<EXPORTADOPOR>LUCAS.RIBEIRO</EXPORTADOPOR>
+				<COLECAO>Pré-Vestibular</COLECAO>
+				<CADERNO>Livro Pré-Vestibular</CADERNO>
+				<LIVRO>1</LIVRO>
+				<MATERIA>Física</MATERIA>
+				<FRENTE>1</FRENTE>
+				<NUMEROCAPITULO>256</NUMEROCAPITULO>
+				<ANO>2011</ANO>
+				<NOMECAPITULO>Poema da água
+				</NOMECAPITULO></INFORMACOES>
+				<ASSUNTOS>
+				<ITEM>
+				<TITULO>Desidratação infantil 
+				</TITULO>
+				<PAGINAINICIO>16</PAGINAINICIO>
+				<PAGINAFIM>16</PAGINAFIM>
+				</ITEM>
+				<ITEM>
+				<TITULO>Criação e evolução
+				</TITULO>
+				<PAGINAINICIO>16</PAGINAINICIO>
+				<PAGINAFIM>16</PAGINAFIM>
+				</ITEM>
+				<ITEM>
+				<TITULO>A importância da água para os seres vivos
+				</TITULO>
+				<PAGINAINICIO>6</PAGINAINICIO>
+				<PAGINAFIM>7</PAGINAFIM>
+				</ITEM>
+				<ITEM>
+				<TITULO>A água e o sangue no corpo humano
+				</TITULO>
+				<PAGINAINICIO>7</PAGINAINICIO>
+				<PAGINAFIM>7</PAGINAFIM>
+				</ITEM>
+				<ITEM>
+				<TITULO>Transporte de água nas plantas 
+				</TITULO>
+				<PAGINAINICIO>8</PAGINAINICIO>
+				<PAGINAFIM>8</PAGINAFIM>
+				</ITEM>
+				<ITEM>
+				<TITULO>Os organismos economizam água
+				</TITULO>
+				<PAGINAINICIO>9</PAGINAINICIO>
+				<PAGINAFIM>9</PAGINAFIM>
+				</ITEM>
+				<ITEM>
+				<TITULO>O ambiente aquático 
+				</TITULO>
+				<PAGINAINICIO>9</PAGINAINICIO>
+				<PAGINAFIM>11</PAGINAFIM>
+				</ITEM>
+				<ITEM>
+				<TITULO> Poluição da água
+				</TITULO>
+				<PAGINAINICIO>11</PAGINAINICIO>
+				<PAGINAFIM>16</PAGINAFIM>
+				</ITEM>
+				</ASSUNTOS>
+				</LIVRO>;
+				
+			import mx.collections.HierarchicalData;
+			import mx.collections.XMLListCollection;
+			
+			private var xmlHierarchy:HierarchicalData;
+			
+			//private var EdrosXML:XMLListCollection = new XMLListCollection(xml);
+
+		]]>
+	</mx:Script>
+	<mx:Panel width="500" layout="absolute" title="Propriedades do arquivo">
+		<mx:Grid width="100%" verticalAlign="middle">
+			<mx:GridRow width="100%" height="100%">
+				<mx:GridItem verticalAlign="middle" textAlign="left">
+					<mx:Label text="Nome do arquivo:"/>
+				</mx:GridItem>
+				<mx:GridItem width="100%" height="100%">
+					<mx:TextInput width="100%" text="{xml.LIVRO.INFORMACOES.ARQUIVO.text}"/>
+				</mx:GridItem>
+			</mx:GridRow>
+			<mx:GridRow width="100%" height="100%">
+				<mx:GridItem>
+				</mx:GridItem>
+				<mx:GridItem height="100%">
+				</mx:GridItem>
+			</mx:GridRow>
+			<mx:GridRow width="100%" height="100%">
+				<mx:GridItem width="50" height="100%">
+				</mx:GridItem>
+				<mx:GridItem>
+				</mx:GridItem>
+			</mx:GridRow>
+		</mx:Grid>
+	</mx:Panel>
+	
+	
+	
+</mx:Application>

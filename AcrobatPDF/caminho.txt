@@ -1,0 +1,8 @@
+C:\Users\marcio.moraes\AppData\Roaming\Adobe\Acrobat\9.0\JavaScripts
+
+"%userprofile%\AppData\Roaming\Adobe\Acrobat\9.0\JavaScripts"
+
+
+C:\Users\usuario\AppData\Roaming\Adobe\Acrobat\9.0\JavaScripts
+
+Substiotuir usuario por usuario local

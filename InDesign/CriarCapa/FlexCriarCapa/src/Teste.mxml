@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="left" layout="vertical" initialize="initApp()">
+	
+	<mx:Script><![CDATA[
+		import mx.containers.TitleWindow;
+		import mx.managers.PopUpManager;
+		import mx.collections.ArrayCollection; 
+		
+		[Bindable]public var gsBindMe:String = "Change me!" ;     //
+		[Bindable]private var acDP2:ArrayCollection;
+		[Bindable]public var acItemsSelected:ArrayCollection;      //set by itemClick of datagrid
+		
+		//called by the initialize event of the application
+		private function initApp():void
+		{
+			acDP2 = new ArrayCollection();
+			acDP2.addItem({artist:"Pink Floyd",price:29.99,album:"Meddle"});
+			acDP2.addItem({artist:"Pink Floyd",price:29.99,album:"More"});
+			acDP2.addItem({artist:"Genesis",price:22.99,album:"Trespass"});
+			acDP2.addItem({artist:"Yes",price:22.99,album:"Close to the Edge"});
+			acDP2.addItem({artist:"King Crimson",price:21.99,album:"Wake of Posiedon"});
+		}// 
+		
+		//called by button, displays the title window pop-up and passes it data
+		private function showTitleWindow():void
+		{
+			var titleWindowInstance:TitleWindowData = TitleWindowData(PopUpManager.createPopUp(this,TitleWindowData,false));     //instantiate and show the title window
+			
+			PopUpManager.centerPopUp(titleWindowInstance);
+			
+			titleWindowInstance.title = "Non-Modal Title Window Data";//built-in property
+			titleWindowInstance.width = 400;                 //built-in property
+			titleWindowInstance.height = 450;                 //built-in property  
+			titleWindowInstance.mainApp = this;                      //Reference to the main app scope
+			titleWindowInstance.gnMyNumber = parseFloat(tiMyNumber.text);  //Pass a simple value to the popup
+			
+		}
+		
+		//called by itemClick event of the datagrid, sets the bindable variable to the selectedItems array
+		private function showSelectedItems(event:Event):void
+		{
+			acItemsSelected = new ArrayCollection(dg2.selectedItems)
+		}//
+		
+	]]></mx:Script>
+	<mx:Label text="Main App" fontSize="18" />
+	<mx:Text text="Selected Items will be passed into the pop-up.&#13;&#13;Select an item and click 'Show Title Window' button"  width="300"/>
+	<mx:DataGrid id="dg2" allowMultipleSelection="true" itemClick="showSelectedItems(event)"
+				 dataProvider="{acDP2}" > 
+		<mx:columns>
+			<mx:Array>
+				<mx:DataGridColumn headerText="Artist" dataField="artist" />
+				<mx:DataGridColumn headerText="Price" dataField="price" editable="true"/>
+				<mx:DataGridColumn headerText="Album" dataField="album" />
+			</mx:Array>
+		</mx:columns>    
+	</mx:DataGrid>
+	
+	<mx:HBox >
+		<mx:Label text="MyNumber:"  width="100"/>
+		<mx:TextInput id="tiMyNumber"  text="99"/>
+	</mx:HBox>
+	<mx:HBox >
+		<mx:Label text="Bind Me"  width="100"/>
+		<mx:TextInput id="tiBindMe" text="{gsBindMe}"
+					  change="gsBindMe = tiBindMe.text"/>
+	</mx:HBox> 
+	<mx:Button label="Show Title Window (Non-Modal)" click="showTitleWindow()"/>
+	<mx:HBox >
+		<mx:Text text="Final Selection:&#13;From item selected in pop-up"  width="100"/>
+		<mx:TextInput id="tiFinalSelection"/>
+	</mx:HBox>  
+</mx:Application>

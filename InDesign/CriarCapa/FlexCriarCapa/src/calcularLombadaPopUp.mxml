@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+				layout="vertical" title="Calcular Lombada" creationComplete="centerWindow()" 
+				showCloseButton="true" close="closeWindow()" width="450" borderStyle="solid" borderThickness="0">
+	
+	<mx:VBox width="100%" horizontalCenter="0" verticalCenter="0" borderThickness="12">
+		<mx:HBox width="100%" height="100%" textAlign="left" horizontalAlign="right" horizontalGap="20" verticalAlign="middle">
+			<mx:Label text="Número de páginas do livro:" width="230"/>
+			<mx:TextInput width="100%" id="lombadaPaginas"/>
+		</mx:HBox>
+		<mx:RadioButtonGroup id="radiogroup2"/>
+	</mx:VBox>
+	<mx:HBox width="100%" height="100%" textAlign="left" horizontalAlign="right" horizontalGap="20" verticalAlign="middle">
+		<mx:Label text="Nome do papel a ser impresso:" width="230"/>
+		<mx:ComboBox width="100%" id="comboPapel" change="mudaPapel()"></mx:ComboBox>
+	</mx:HBox>
+	
+	<mx:Script>
+		<![CDATA[
+			import com.adobe.flex.extras.controls.MaskedTextInput;
+			
+			import flash.events.*;
+			import flash.external.ExternalInterface;
+			import flash.net.*;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.HierarchicalData;
+			import mx.controls.*;
+			import mx.controls.Alert;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.mx_internal;
+			import mx.events.*;
+			import mx.managers.*;
+			import mx.managers.PopUpManager;
+			import mx.states.*;
+			
+			[Bindable] public var DataGridName02:Object;
+			[Bindable] public var DataGridNameAC02:ArrayCollection;
+			[Bindable] public var arrayGramaturaAltaAlvuraAlcalino:Array = new Array();
+			[Bindable] public var arrayGramaturaOffset:Array = new Array();
+			[Bindable] public var arrayGramaturaPolenSoft:Array = new Array();
+			[Bindable] public var arrayGramaturaProl:Array = new Array();
+			[Bindable] public var arrayGramaturaPolenBold:Array = new Array();
+			[Bindable] public var arrayGramaturaReciclato:Array = new Array();
+			//[Bindable] public var DataGridNameAC:HierarchicalData;
+			
+			
+			
+			private function centerWindow():void {
+				
+				PopUpManager.centerPopUp(this);
+				
+				//Cria o array de papel
+				var arrayPapel:Array = new Array();
+				arrayPapel.push("Alta Alvura Alcalino");
+				arrayPapel.push("Paperfect Offset");
+				arrayPapel.push("Pólen Soft");
+				arrayPapel.push("Pólen Bold");
+				arrayPapel.push("Reciclato");
+				arrayPapel.push("PROL");
+				
+				
+				
+				//Cria os arrays dos papeis
+				//var arrayGramaturaAltaAlvuraAlcalino:Array = new Array();					
+				arrayGramaturaAltaAlvuraAlcalino.push("63");
+				arrayGramaturaAltaAlvuraAlcalino.push("70");
+				arrayGramaturaAltaAlvuraAlcalino.push("75");
+				arrayGramaturaAltaAlvuraAlcalino.push("90");
+				arrayGramaturaAltaAlvuraAlcalino.push("120");
+				arrayGramaturaAltaAlvuraAlcalino.push("150");
+				arrayGramaturaAltaAlvuraAlcalino.push("180");
+				arrayGramaturaAltaAlvuraAlcalino.push("240");
+				
+				//var arrayGramaturaOffset:Array = new Array();
+				arrayGramaturaOffset.push("56");
+				arrayGramaturaOffset.push("60");
+				arrayGramaturaOffset.push("63");
+				arrayGramaturaOffset.push("70");
+				arrayGramaturaOffset.push("75");
+				arrayGramaturaOffset.push("80");
+				arrayGramaturaOffset.push("90");
+				arrayGramaturaOffset.push("104");
+				
+				//var arrayGramaturaPolenSoft:Array = new Array();
+				arrayGramaturaPolenSoft.push("70");
+				arrayGramaturaPolenSoft.push("80");
+				
+				//var arrayGramaturaPolenBold:Array = new Array();
+				arrayGramaturaPolenBold.push("70");
+				arrayGramaturaPolenBold.push("90");
+				
+				//var arrayGramaturaReciclato:Array = new Array();
+				arrayGramaturaReciclato.push("75");
+				arrayGramaturaReciclato.push("90");
+				arrayGramaturaReciclato.push("120");
+				arrayGramaturaReciclato.push("150");
+				arrayGramaturaReciclato.push("180");
+				arrayGramaturaReciclato.push("240");
+				
+				comboPapel.dataProvider = arrayPapel;
+				
+				
+				comboPapel.selectedIndex = 1;
+				
+				mudaPapel();
+				
+				comboGramatura.selectedIndex = 4;
+				
+			}
+			
+			private function funcaoCalcularLombada():void{
+				
+				if(lombadaPaginas.text != ""){
+			
+					resultado.text = String(ExternalInterface.call("calcularLombada",lombadaPaginas.text,comboGramatura.selectedLabel,comboPapel.selectedLabel));
+				
+				}
+				else{
+					Alert.show("Digite um número de páginas");
+				}
+				
+				
+			}
+			
+			private function mudaPapel():void{
+				
+				//var arrayGramatura:Array = new Array();
+				
+				//comboGramatura.enabled = false;
+				
+				//comboGramatura.initialize();
+				//comboPapel.open();
+				
+				if(comboPapel.selectedLabel == "Alta Alvura Alcalino"){
+
+					comboGramatura.dataProvider = arrayGramaturaAltaAlvuraAlcalino;
+					//Alert.show(comboGramatura.instanceIndex.toString());
+					//comboGramatura.open();
+					
+				}
+				
+				if(comboPapel.selectedLabel == "Paperfect Offset"){
+					
+					comboGramatura.dataProvider = arrayGramaturaOffset;
+					//comboGramatura.open();
+
+				}
+				
+				if(comboPapel.selectedLabel == "Pólen Soft"){
+					
+					comboGramatura.dataProvider = arrayGramaturaPolenSoft;
+					//comboGramatura.open();
+					
+				}
+				
+				if(comboPapel.selectedLabel == "Pólen Bold"){
+
+					comboGramatura.dataProvider = arrayGramaturaPolenBold;
+					//comboGramatura.open();
+					
+				}
+				
+				if(comboPapel.selectedLabel == "Reciclato"){
+					
+					comboGramatura.dataProvider = arrayGramaturaReciclato;
+					//comboGramatura.open();
+	
+				}
+				
+			}
+			
+			
+			private function closeWindow():void{
+				
+				PopUpManager.removePopUp(this);
+			}
+			
+			public var editNameWindowParent:IFlexDisplayObject;
+			
+			[Bindable]public var mainApp:Object = null; 			
+			
+			private function saveButton():void{
+				
+
+				if(resultado.text != ""){
+					mainApp.paginas.text = lombadaPaginas.text;
+					mainApp.lombada.text = resultado.text;
+					closeWindow();
+				}
+				else{
+					Alert.show("Nenhum valor foi calculado");
+				}
+					
+
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:HBox width="100%" height="100%" textAlign="left" horizontalAlign="right" horizontalGap="20" verticalAlign="middle">
+		<mx:Label text="Gramatura do papel (usado no miolo):" width="230"/>
+		<mx:ComboBox width="100%" id="comboGramatura"></mx:ComboBox>
+	</mx:HBox>
+	<mx:HBox width="100%" height="100%" textAlign="left" horizontalAlign="right" horizontalGap="20" verticalAlign="middle">
+		<mx:Label text="Resultado:" width="230"/>
+		<mx:Label width="100%" id="resultado"/>
+	</mx:HBox>
+	<mx:HBox width="100%" height="100%" textAlign="left" horizontalAlign="right" horizontalGap="20" verticalAlign="middle">
+		<mx:Button label="Calcular" click="funcaoCalcularLombada();"/>
+		<mx:Button label="Adicionar resultado" click="saveButton();"/>
+		<mx:Button click="closeWindow();" label="Cancelar"/>
+	</mx:HBox>
+</mx:TitleWindow>

@@ -1,0 +1,34 @@
+A propos de BookBarcode 2.036 [patch]
+pour Adobe InDesign CS4/CS5/CS6/CC...
+
+==============================
+
+16 juin 2017. - Cette version spéciale de BookBarcode -- étiquetée
+"v.2.036 [patch]" -- vise essentiellement la compatibilité avec les
+versions récentes d'InDesign (de CS6 à CC), en corrigeant plusieurs
+problèmes liés à l'interface utilisateur. Voici les changements les
+plus notables :
+
+- Permet au traitement par lots, aux boutons et aux "boutons radio" de
+répondre correctement sous CC.
+
+- Correction d'un bug lié aux options d'arrondis.
+
+- Traitement de codes-barres réduits (jusqu'à 14 x 14 pt).
+
+- Mise à jour de l'espace ISBN prenant en charge les nouveaux groupes
+spécifiés par isbn-international.
+
+- Restauration correcte de la fenêtre active InDesign.
+
+ATTENTION. - La version 2.036 ne supporte plus InDesign CS3.
+
+==============================
+
+Interfaces supportées : français, anglais ou allemand.
+
+Pour de plus amples précisions, reportez-vous à la page projet :
+<http://indiscripts.com/category/projects/BookBarcode>
+
+Pour tout commentaire ou signalement de bug, n'hésitez pas à contacter
+l'auteur à <marc@indiscripts.com>

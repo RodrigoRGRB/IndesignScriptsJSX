@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"  creationComplete="iniciarFlexEdros01();ordenarColunas()">
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.external.ExternalInterface;
+			
+			import mx.charts.chartClasses.InstanceCache;
+			import mx.collections.*;
+			import mx.collections.ArrayCollection;
+			import mx.collections.HierarchicalData;
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.collections.XMLListCollection;
+			import mx.controls.Alert;
+			import mx.controls.DataGrid;
+			import mx.controls.dataGridClasses.*;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IUIComponent;
+			import mx.events.CloseEvent;
+			import mx.events.DragEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.TreeEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.events.VideoEvent;
+			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
+			import mx.messaging.messages.ErrorMessage;
+			import mx.utils.ArrayUtil;
+			import mx.validators.StringValidator;
+			
+			import spark.components.ComboBox;
+			
+			//public var xml:XML;
+			//private var xmlHierarchy:HierarchicalData;
+			
+			public var tagString:String;
+			public var arrayAssuntosTemp:Array;
+			public var arrayTag:Array;
+			public var arrayDadosDocumento:Array;
+			private var current : Object = new Object();
+			[Bindable] public var arrayErro:ArrayCollection = new ArrayCollection();
+			private var lancaErro:Boolean = false;
+			
+			//Arrays das combos
+			[Bindable] public var arrayComboAno:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboColecao:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboLivro:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboMateria:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboFrenteLetra:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboFrenteNumero:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboCapitulo:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboAnoEF:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboSemestre:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboSubColecaoPV:ArrayCollection = new ArrayCollection();
+			[Bindable] public var arrayComboCaderno:ArrayCollection = new ArrayCollection();
+			
+			private function ordenarArray(arrayTemp:ArrayCollection, textoInvalido:String):ArrayCollection
+			{
+				arrayTemp.source.sortOn('label');
+				arrayTemp.refresh();
+				arrayTemp.addItemAt({tagIndesign:"INVALIDO", label:textoInvalido},0);
+				
+				return arrayTemp;
+			}
+			
+			private function iniciarFlexEdros01():void
+			{	
+				try
+				{
+					
+					var arrayTemporario:ArrayCollection = new ArrayCollection();
+					
+					//================================================================
+					//FUNCOES DE CAPTURA DO SCRIPT
+					
+					var stringtemp:String;
+					
+					//CAPTURA OS DADOS DO DOCUMENTO
+					stringtemp = String(ExternalInterface.call("capturaDadosDocumento"));
+					if(stringtemp.split(",")[2] == "naoSalvo")
+					{
+						
+						arrayErro.addItem({erro:"O documento não está salvo", resolucao:"Só é possível exportar os dados para o Edros após salvar o arquivo do indesign."});
+						lancaErro = true;
+					}
+					else
+					{
+						arrayDadosDocumento = stringtemp.split(",");
+					}
+					
+					if(stringtemp.split(",")[0] == "erroNomeDoCapitulo")
+					{
+						arrayErro.addItem({erro:"Estilo '(EDROS CAPÍTULO)' não encontrado", resolucao:"Abra a janela 'PARAGRAPHS STYLES' e acrescente ao estilo usado no nome do capítulo a marcação '(EDROS CAPÍTULO)'\n\nEx: 'CAPÍTULO (EDROS CAPÍTULO)'"});
+						lancaErro = true;
+					}
+					else
+					{
+						arrayDadosDocumento = stringtemp.split(",");
+					}
+					
+
+					//CAPTURA O ASSUNTO
+					stringtemp = String(ExternalInterface.call("capturaAssuntos"));
+					//Alert.show(stringtemp);
+					if(stringtemp == "erroAssunto")
+					{
+						arrayErro.addItem({erro:"Estilo '(EDROS ASSUNTO)' não encontrado", resolucao:"Abra a janela 'PARAGRAPHS STYLES' e acrescente ao estilo usado nos assuntos a marcação '(EDROS ASSUNTO)'\n\nEx: 'Título nível 1 (EDROS ASSUNTO)'"});
+						lancaErro = true;
+					}
+					else
+					{
+						arrayAssuntosTemp = stringtemp.split(",");
+						
+						//Alert.show(arrayAssuntosTemp[0].toString());
+						
+						for(i=0; i<arrayAssuntosTemp.length; i++)
+						{
+							arrayAssuntosTemp[i] = arrayAssuntosTemp[i].replace("###",",");
+						}
+					}
+
+					if(lancaErro)
+						throw "Erro";
+					
+					//=================================================================
+					//CARREGA AS INFORMAÇÕES DO ARQUIVO
+					
+					//Dados do documento
+					txtNomeCapitulo.text = arrayDadosDocumento[0];
+					txtExportadoPor.text = arrayDadosDocumento[1];
+					txtCaminhoArquivo.text = arrayDadosDocumento[2];
+					
+					//=================================================================
+					//POPULA O DATAGRID
+					
+					//var arrayTemporario:ArrayCollection = new ArrayCollection();
+					for(var i:int = 0; i < arrayAssuntosTemp.length; i = i+3)
+					{
+						arrayTemporario.addItem({assunto:arrayAssuntosTemp[i], pgInicial:parseInt(arrayAssuntosTemp[i+1], 10), pgFinal:parseInt(arrayAssuntosTemp[i+2], 10)});
+					}
+					dataGrid.dataProvider = arrayTemporario;
+					
+					//================================================================
+					//CRIA O ARRAY DE TODAS AS COMBOS
+					
+					//Combo ano
+					var dt:Date= new Date();
+					arrayComboAno.addItem({tagIndesign:"INVALIDO", label:"Selecione o ano"});
+					arrayComboAno.addItem({tagIndesign:"ANO"+String(dt.getFullYear()-2), label:dt.getFullYear()-2});
+					arrayComboAno.addItem({tagIndesign:"ANO"+String(dt.getFullYear()-1), label:dt.getFullYear()-1});
+					arrayComboAno.addItem({tagIndesign:"ANO"+String(dt.getFullYear()), label:dt.getFullYear()});
+					arrayComboAno.addItem({tagIndesign:"ANO"+String(dt.getFullYear()+1), label:dt.getFullYear()+1});
+					arrayComboAno.addItem({tagIndesign:"ANO"+String(dt.getFullYear()+2), label:dt.getFullYear()+2});
+					
+					//Combo Coleção
+					//arrayComboColecao.addItem({tagIndesign:"INVALIDO", label:"Selecione a coleção"});
+					arrayComboColecao.addItem({tagIndesign:"EF", label:"Ensino Fundamental"});
+					arrayComboColecao.addItem({tagIndesign:"EM", label:"Ensino Médio"});
+					arrayComboColecao.addItem({tagIndesign:"PV", label:"Pré-Vestibular"});
+					ordenarArray(arrayComboColecao, "Selecione a coleção");
+					
+					//Combo Livro
+					//arrayComboLivro.addItem({tagIndesign:"INVALIDO", label:"Selecione o livro"});
+					arrayComboLivro.addItem({tagIndesign:"LU", label:"Livro único"});
+					arrayComboLivro.addItem({tagIndesign:"L1", label:"Livro 1"});
+					arrayComboLivro.addItem({tagIndesign:"L2", label:"Livro 2"});
+					arrayComboLivro.addItem({tagIndesign:"L3", label:"Livro 3"});
+					arrayComboLivro.addItem({tagIndesign:"L4", label:"Livro 4"});
+					ordenarArray(arrayComboLivro, "Selecione o livro");
+					
+					//Combo Matéria
+					arrayComboMateria.addItem({tagIndesign:"BIO", label:"Biologia"});
+					arrayComboMateria.addItem({tagIndesign:"DG", label:"Desenho Geométrico"});
+					arrayComboMateria.addItem({tagIndesign:"CIE", label:"Ciências"});
+					arrayComboMateria.addItem({tagIndesign:"FIS", label:"Física"});
+					arrayComboMateria.addItem({tagIndesign:"GEO", label:"Geografia"});
+					arrayComboMateria.addItem({tagIndesign:"HIS", label:"História"});
+					arrayComboMateria.addItem({tagIndesign:"MAT", label:"Matemática"});
+					arrayComboMateria.addItem({tagIndesign:"PORT", label:"Português"});
+					arrayComboMateria.addItem({tagIndesign:"QUI", label:"Química"});
+					arrayComboMateria.addItem({tagIndesign:"ARTES", label:"Artes"});
+					arrayComboMateria.addItem({tagIndesign:"EDFIS", label:"Educação Física"});
+					arrayComboMateria.addItem({tagIndesign:"ESP", label:"Espanhol"});
+					arrayComboMateria.addItem({tagIndesign:"FIL", label:"Filosofia"});
+					arrayComboMateria.addItem({tagIndesign:"FISMOD", label:"Física Moderna"});
+					arrayComboMateria.addItem({tagIndesign:"ING", label:"Inglês"});
+					arrayComboMateria.addItem({tagIndesign:"INTERPTEXT", label:"Interpretação de Texto"});
+					arrayComboMateria.addItem({tagIndesign:"MATBASVET", label:"Matemática Básica e Vetores"});
+					arrayComboMateria.addItem({tagIndesign:"RED", label:"Redação"});
+					arrayComboMateria.addItem({tagIndesign:"SOC", label:"Sociologia"});
+					arrayComboMateria.addItem({tagIndesign:"LABFIS", label:"Laboratório de Física"});
+					arrayComboMateria.addItem({tagIndesign:"MUS", label:"Música"});
+					ordenarArray(arrayComboMateria, "Selecione a matéria");
+					
+					//Combo FrenteLetra
+					//arrayComboFrenteLetra.addItem({tagIndesign:"INVALIDO", label:"Selecione a frente"});
+					arrayComboFrenteLetra.addItem({tagIndesign:"FA", label:"Frente A"});
+					arrayComboFrenteLetra.addItem({tagIndesign:"FB", label:"Frente B"});
+					ordenarArray(arrayComboFrenteLetra, "Selecione a frente");
+					
+					//Combo FrenteNumero
+					//arrayComboFrenteNumero.addItem({tagIndesign:"INVALIDO", label:"Selecione a frente"});
+					arrayComboFrenteNumero.addItem({tagIndesign:"F1", label:"Frente 1"});
+					arrayComboFrenteNumero.addItem({tagIndesign:"F2", label:"Frente 2"});
+					arrayComboFrenteNumero.addItem({tagIndesign:"F3", label:"Frente 3"});
+					arrayComboFrenteNumero.addItem({tagIndesign:"F4", label:"Frente 4"});
+					ordenarArray(arrayComboFrenteNumero, "Selecione a frente");
+					
+					//Combo Capitulo - Adiciona 30 capítulos
+					arrayComboCapitulo.addItem({tagIndesign:"INVALIDO", label:"Selecione o capítulo"});
+					for(var i:int = 1; i <= 30; i++)
+					{
+						arrayComboCapitulo.addItem({tagIndesign:"CAP"+i, label:"Capítulo "+i});
+					}
+	
+					//Combo AnoEF
+					//arrayComboAnoEF.addItem({tagIndesign:"INVALIDO", label:"Selecione o ano"});
+					arrayComboAnoEF.addItem({tagIndesign:"ANOEF6", label:"6º Ano"});
+					arrayComboAnoEF.addItem({tagIndesign:"ANOEF7", label:"7º Ano"});
+					arrayComboAnoEF.addItem({tagIndesign:"ANOEF8", label:"8º Ano"});
+					arrayComboAnoEF.addItem({tagIndesign:"ANOEF9", label:"9º Ano"});
+					ordenarArray(arrayComboAnoEF, "Selecione o ano");
+					
+					//Combo Semestre
+					//arrayComboSemestre.addItem({tagIndesign:"INVALIDO", label:"Selecione o semestre"});
+					arrayComboSemestre.addItem({tagIndesign:"SEMESTRE1", label:"1º Semestre"});
+					arrayComboSemestre.addItem({tagIndesign:"SEMESTRE2", label:"2º Semestre"});
+					ordenarArray(arrayComboSemestre, "Selecione o semestre");
+					
+					//Combo SubColecaoPV
+					//arrayComboSubColecaoPV.addItem({tagIndesign:"INVALIDO", label:"Selecione a coleção"});
+					arrayComboSubColecaoPV.addItem({tagIndesign:"LPV", label:"Livros Pré-Vestibular"});
+					arrayComboSubColecaoPV.addItem({tagIndesign:"HEXA", label:"Hexa"});
+					arrayComboSubColecaoPV.addItem({tagIndesign:"HUMANAS", label:"Humanas"});
+					arrayComboSubColecaoPV.addItem({tagIndesign:"ITA", label:"ITA"});
+					arrayComboSubColecaoPV.addItem({tagIndesign:"MEDICINA", label:"Medicina"});
+					arrayComboSubColecaoPV.addItem({tagIndesign:"OCTA", label:"Octa"});
+					arrayComboSubColecaoPV.addItem({tagIndesign:"TETRA", label:"Tetra"});
+					ordenarArray(arrayComboSubColecaoPV, "Selecione a coleção");
+					
+					//Combo Caderno
+					//arrayComboCaderno.addItem({tagIndesign:"INVALIDO", label:"Selecione o caderno"});
+					arrayComboCaderno.addItem({tagIndesign:"CAD1", label:"Caderno 1"});
+					arrayComboCaderno.addItem({tagIndesign:"CAD2", label:"Caderno 2"});
+					arrayComboCaderno.addItem({tagIndesign:"CAD3", label:"Caderno 3"});
+					arrayComboCaderno.addItem({tagIndesign:"CAD4", label:"Caderno 4"});
+					ordenarArray(arrayComboCaderno, "Selecione o caderno");
+					
+					//Inicializa as combos
+					combo01.dataProvider = arrayComboAno;
+					combo02.dataProvider = arrayComboColecao;
+					
+					mudaCombo02();
+					
+					
+					//CAPTURA AS TAGS DO INDESIGN E PREENCHE AS COMBOS
+					
+					tagString = String(ExternalInterface.call("capturaTAG"));
+					arrayTag = tagString.split("_");
+					
+					//Alert.show(tagString);
+					
+					var combo:mx.controls.ComboBox;
+
+					if(arrayTag.length > 1)
+					{
+						//Seleciona a combo
+						combo = combo01;
+						for(var i:int = 0; i < combo.dataProvider.length; i++)
+						{
+							if(combo.dataProvider[i].tagIndesign == arrayTag[0])
+								combo.selectedIndex = i;
+						}
+						
+						//Seleciona a combo
+						combo = combo02;
+						for(var i:int = 0; i < combo.dataProvider.length; i++)
+						{
+							if(combo.dataProvider[i].tagIndesign == arrayTag[1])
+								combo.selectedIndex = i;
+						}
+						
+						mudaCombo02();
+						
+						
+						//Seleciona a combo
+						combo = combo03;
+						for(var i:int = 0; i < combo.dataProvider.length; i++)
+						{
+							if(combo.dataProvider[i].tagIndesign == arrayTag[2])
+								combo.selectedIndex = i;
+						}
+						
+						mudaCombo03();
+						
+					}
+					
+					switch(arrayTag.length)
+					{
+						case 7:
+						{
+							combo = combo07;
+							for(var i:int = 0; i < combo.dataProvider.length; i++)
+							{
+								if(combo.dataProvider[i].tagIndesign == arrayTag[6])
+									combo.selectedIndex = i;
+							}
+						}
+							
+						case 6:
+						{
+							combo = combo06;
+							for(var i:int = 0; i < combo.dataProvider.length; i++)
+							{
+								if(combo.dataProvider[i].tagIndesign == arrayTag[5])
+									combo.selectedIndex = i;
+							}
+						}
+							
+						case 5:
+						{
+							combo = combo05;
+							for(var i:int = 0; i < combo.dataProvider.length; i++)
+							{
+								if(combo.dataProvider[i].tagIndesign == arrayTag[4])
+									combo.selectedIndex = i;
+							}
+						}
+							
+						case 4:
+						{
+							combo = combo04;
+							for(var i:int = 0; i < combo.dataProvider.length; i++)
+							{
+								if(combo.dataProvider[i].tagIndesign == arrayTag[3])
+									combo.selectedIndex = i;
+							}
+						}
+							
+					}
+				
+				}
+				catch(e:String)
+				{
+					//================================================================
+					//EXIBE O STACK ERROR E POPULA O DATAGRID COM OS ERROS
+					
+					viewstack1.selectedIndex = 1;
+				}
+			}
+			
+			//================================================================
+			//FUNÇÕES PARA CARREGAR AS COMBOS
+			
+			private function mudaCombo02():void{
+				switch(combo02.selectedLabel)
+				{
+					case "Ensino Fundamental":
+					{
+						combo03.dataProvider = arrayComboAnoEF;
+						combo04.dataProvider = arrayComboMateria;
+						combo05.dataProvider = arrayComboSemestre;
+						combo06.dataProvider = arrayComboCapitulo;
+						
+						combo03.visible = true;
+						combo04.visible = true;
+						combo05.visible = true;
+						combo06.visible = true;
+						combo07.visible = false;
+						break;
+					} 
+					case "Ensino Médio":
+					{
+						combo03.dataProvider = arrayComboLivro;
+						combo04.dataProvider = arrayComboMateria;
+						combo05.dataProvider = arrayComboFrenteLetra;
+						combo06.dataProvider = arrayComboCapitulo;
+						
+						combo03.visible = true;
+						combo04.visible = true;
+						combo05.visible = true;
+						combo06.visible = true;
+						combo07.visible = false;
+						break;
+					} 
+					case "Pré-Vestibular":
+					{
+						combo03.dataProvider = arrayComboSubColecaoPV;
+						
+						combo03.visible = true;
+						combo04.visible = false;
+						combo05.visible = false;
+						combo06.visible = false;
+						combo07.visible = false;
+						break;
+					}
+					case "Selecione a coleção":
+					{
+						combo03.visible = false;
+						combo04.visible = false;
+						combo05.visible = false;
+						combo06.visible = false;
+						combo07.visible = false;
+						break;
+					}
+				}
+			}
+			
+			private function mudaCombo03():void{
+				
+				if(combo03.selectedLabel == "Livros Pré-Vestibular")
+				{
+					combo04.dataProvider = arrayComboLivro;
+					combo05.dataProvider = arrayComboMateria;
+					combo06.dataProvider = arrayComboFrenteNumero;
+					combo07.dataProvider = arrayComboCapitulo;
+					
+					combo04.visible = true;
+					combo05.visible = true;
+					combo06.visible = true;
+					combo07.visible = true;
+				}
+				else if(combo03.selectedLabel == "Selecione a coleção")
+				{
+					combo04.visible = false;
+					combo05.visible = false;
+					combo06.visible = false;
+					combo07.visible = false;
+				}
+				else if(combo03.selectedLabel == "ITA")
+				{
+					combo04.dataProvider = arrayComboCaderno;
+					
+					combo04.visible = true;
+					combo05.visible = false;
+					combo06.visible = false;
+					combo07.visible = false;
+				}
+				else
+				{
+					if(combo02.selectedLabel == "Pré-Vestibular")
+					{
+						combo04.dataProvider = arrayComboCaderno;
+						combo05.dataProvider = arrayComboFrenteNumero;
+						combo06.dataProvider = arrayComboMateria;
+						
+						combo04.visible = true;
+						combo05.visible = true;
+						combo06.visible = true;
+						combo07.visible = false;
+					}
+				}
+			}
+			
+			//================================================================
+				
+			public function ordenarColunas(){
+				
+				var ar:ArrayCollection = dataGrid.dataProvider as ArrayCollection;
+
+				var sortThese:Sort = new Sort();
+				sortThese.fields = [new SortField("pgInicial", true, false,true)];
+				ar.sort= sortThese;
+				ar.refresh(); 
+			}
+			
+			private function devolveCor():void
+			{
+				combo01.setStyle("color","#000000");
+				combo02.setStyle("color","#000000");
+				combo03.setStyle("color","#000000");
+				combo04.setStyle("color","#000000");
+				combo05.setStyle("color","#000000");
+				combo06.setStyle("color","#000000");
+				combo07.setStyle("color","#000000");
+			}
+
+			private function exportarEdros():void
+			{
+				//Cria a tag para cadastrar no Indesign
+				var tag:String = "";
+				
+				var camposValidos01:Boolean = true;
+				var camposValidos02:Boolean = true;
+				var camposValidos03:Boolean = true;
+				var camposValidos04:Boolean = true;
+				var camposValidos05:Boolean = true;
+				var camposValidos06:Boolean = true;
+				var camposValidos07:Boolean = true;
+				
+				if(combo01.visible)
+				{
+					if(combo01.selectedItem.tagIndesign != "INVALIDO")
+					{
+						tag += "_"+combo01.selectedItem.tagIndesign;
+						camposValidos01 = true;
+					}
+					else
+					{
+						combo01.setStyle("color","#F8615D");
+						camposValidos01 = false;
+					}
+				}
+				
+				if(combo02.visible)
+				{
+					if(combo02.selectedItem.tagIndesign != "INVALIDO")
+					{
+						tag += "_"+combo02.selectedItem.tagIndesign;
+						camposValidos02 = true;
+					}
+					else
+					{
+						combo02.setStyle("color","#F8615D");
+						camposValidos02 = false;
+					}
+				}
+				
+				if(combo03.visible)
+				{
+					if(combo03.selectedItem.tagIndesign != "INVALIDO")
+					{
+						tag += "_"+combo03.selectedItem.tagIndesign;
+						camposValidos03 = true;
+					}
+					else
+					{
+						combo03.setStyle("color","#F8615D");
+						camposValidos03 = false;
+					}
+				}
+				
+				if(combo04.visible)
+				{
+					if(combo04.selectedItem.tagIndesign != "INVALIDO")
+					{
+						tag += "_"+combo04.selectedItem.tagIndesign;
+						camposValidos04 = true;
+					}
+					else
+					{
+						combo04.setStyle("color","#F8615D");
+						camposValidos04 = false;
+					}
+				}
+				
+				if(combo05.visible)
+				{
+					if(combo05.selectedItem.tagIndesign != "INVALIDO")
+					{
+						tag += "_"+combo05.selectedItem.tagIndesign;
+						camposValidos05 = true;
+					}
+					else
+					{
+						combo05.setStyle("color","#F8615D");
+						camposValidos05 = false;
+					}
+				}
+				
+				if(combo06.visible)
+				{
+					if(combo06.selectedItem.tagIndesign != "INVALIDO")
+					{
+						tag += "_"+combo06.selectedItem.tagIndesign;
+						camposValidos06 = true;
+					}
+					else
+					{
+						combo06.setStyle("color","#F8615D");
+						camposValidos06 = false;
+					}
+				}
+				
+				if(combo07.visible)
+				{
+					if(combo07.selectedItem.tagIndesign != "INVALIDO")
+					{
+						tag += "_"+combo07.selectedItem.tagIndesign;
+						camposValidos07 = true;
+					}
+					else
+					{
+						combo07.setStyle("color","#F8615D");
+						camposValidos07 = false;
+					}
+				}
+				
+				tag = tag.substring(1,tag.length);
+					
+				if(camposValidos01 && camposValidos02 && camposValidos03 && camposValidos04 && camposValidos05 && camposValidos06 && camposValidos07)
+				{
+					//Alert.show(tag);
+					ExternalInterface.call("exportarEdros",tag);
+				}
+			}
+			
+			private function cancelar():void
+			{
+				ExternalInterface.call("cancelar");
+			}
+			
+			private function selecionaEstilo():void
+			{
+				//Alert.show(dataGrid.selectedItem.assunto);
+				ExternalInterface.call("selecionaEstilo", dataGrid.selectedItem.assunto);
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:VBox height="100%" width="100%">
+		<mx:Label text="Sincroniza Edros" fontSize="22" fontFamily="Georgia"/>
+		<mx:ViewStack id="viewstack1" width="100%" height="100%">
+			<mx:Canvas label="viewDefault" width="100%" height="100%">
+				<mx:VBox width="100%" height="100%">
+				<mx:HBox width="100%" height="100%">
+					<mx:Panel width="300" height="100%" layout="absolute" title="Informações do arquivo">
+						<mx:Grid width="100%" height="100%" verticalAlign="top" paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
+							<mx:GridRow width="100%" height="100%">
+								<mx:GridItem width="100%" height="100%">
+									<mx:ComboBox editable="false" width="100%" change="devolveCor()" id="combo01"></mx:ComboBox>
+								</mx:GridItem>
+							</mx:GridRow>
+							<mx:GridRow width="100%" height="100%" verticalAlign="top">
+								<mx:GridItem width="100%" height="100%" verticalAlign="top">
+									<mx:ComboBox editable="false" width="100%" change="devolveCor();mudaCombo02()" id="combo02"></mx:ComboBox>
+								</mx:GridItem>
+							</mx:GridRow>
+							<mx:GridRow width="100%" height="100%">
+								<mx:GridItem width="100%" height="100%">
+									<mx:ComboBox editable="false" width="100%" change="devolveCor();mudaCombo03()" id="combo03"></mx:ComboBox>
+								</mx:GridItem>
+							</mx:GridRow>
+							<mx:GridRow width="100%" height="100%">
+								<mx:GridItem width="100%" height="100%">
+									<mx:ComboBox editable="false" width="100%" change="devolveCor()" id="combo04"></mx:ComboBox>
+								</mx:GridItem>
+							</mx:GridRow>
+							<mx:GridRow width="100%" height="100%">
+								<mx:GridItem width="100%" height="100%">
+									<mx:ComboBox editable="false" width="100%" change="devolveCor()" id="combo05"></mx:ComboBox>
+								</mx:GridItem>
+							</mx:GridRow>
+							<mx:GridRow width="100%" height="100%">
+								<mx:GridItem width="100%" height="100%">
+									<mx:ComboBox editable="false" width="100%" change="devolveCor()" id="combo06"></mx:ComboBox>
+								</mx:GridItem>
+							</mx:GridRow>
+							<mx:GridRow width="100%" height="100%">
+								<mx:GridItem width="100%" height="100%">
+									<mx:ComboBox editable="false" width="100%" change="devolveCor()" id="combo07"></mx:ComboBox>
+								</mx:GridItem>
+							</mx:GridRow>
+							<mx:GridRow width="100%" height="100%">
+								<mx:GridItem width="100%" height="100%">
+									<mx:Label text="Nome do capítulo" width="105"/>
+									<mx:TextInput width="100%" id="txtNomeCapitulo" editable="false"/>
+								</mx:GridItem>
+							</mx:GridRow>
+							<mx:GridRow width="100%" height="100%">
+								<mx:GridItem width="100%" height="100%">
+									<mx:Label text="Exportado por" width="105"/>
+									<mx:TextInput width="100%" id="txtExportadoPor" editable="false"/>
+								</mx:GridItem>
+							</mx:GridRow>
+							<mx:GridRow width="100%" height="100%">
+								<mx:GridItem width="100%" height="100%">
+									<mx:Label text="Indesign:" width="105"/>
+									<mx:TextInput width="100%" id="txtCaminhoArquivo" editable="false"/>
+								</mx:GridItem>
+							</mx:GridRow>
+						</mx:Grid>
+					</mx:Panel>
+					<mx:Panel width="100%" height="100%" layout="absolute" title="Assuntos do livro">
+						<mx:DataGrid id="dataGrid" click="selecionaEstilo()" width="100%" height="100%">
+							<mx:columns>
+								<mx:DataGridColumn id="nomeAssunto"  headerText="Assuntos" dataField="assunto"/>
+								<mx:DataGridColumn width="55" headerText="Início" dataField="pgInicial"/>
+								<mx:DataGridColumn width="55" headerText="Fim" dataField="pgFinal"/>
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:Panel>
+				</mx:HBox>
+				<mx:HBox width="100%" horizontalAlign="right">
+					<mx:Button label="Exportar dados e fechar PDF" click="exportarEdros()"/>
+					<mx:Button label="Cancelar" click="cancelar();"/>
+				</mx:HBox>
+				</mx:VBox>
+			</mx:Canvas>
+			<mx:Canvas label="ViewErro" width="100%" height="100%">
+				<mx:VBox width="100%" height="100%">
+					<mx:Panel width="100%" height="100%" layout="absolute" title="Não foi possível realizar a operação">
+						<mx:HBox width="100%" height="100%">
+							<mx:Canvas height="100%">
+								<mx:Image source="error.png" scaleContent="false" autoLoad="true" y="100"/>
+							</mx:Canvas>
+							<mx:DataGrid dataProvider="{arrayErro}" variableRowHeight="true" x="150" width="100%" height="100%" id="dataGridErro">
+								<mx:columns>
+									<mx:DataGridColumn wordWrap="true" width="150" headerText="Erro" dataField="erro"/>
+									<mx:DataGridColumn wordWrap="true" width="300" headerText="Como resolver" dataField="resolucao"/>
+								</mx:columns>
+							</mx:DataGrid>
+						</mx:HBox>
+					</mx:Panel>
+					<mx:HBox width="100%" horizontalAlign="right">
+						<mx:Button label="Fechar" click="cancelar();"/>
+					</mx:HBox>
+				</mx:VBox>
+			</mx:Canvas>
+		</mx:ViewStack>
+	</mx:VBox>
+	
+</mx:Application>

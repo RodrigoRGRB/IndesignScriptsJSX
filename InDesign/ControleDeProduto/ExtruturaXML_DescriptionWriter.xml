@@ -1,0 +1,10 @@
+<controledeproduto>
+	<data>Thu Oct 27 2011 16:34:21 GMT-0200</data>
+	<task>
+		<activityid>" + activityid + "</activityid>
+		<actualdurationminutes>0</actualdurationminutes>
+	</task>
+</controledeproduto>
+
+
+http://localhost:5731/WebSite/ControleDeProduto.aspx?abrindoArquivo=true&arquivo=/t/Desenvolvimento/Documentacao/Editora%20-%20Controle%20de%20Produtos/Arquivos/Edros.indd&tipoAtividade=ilustracao&activityid=99999&actualdurationminutes=0

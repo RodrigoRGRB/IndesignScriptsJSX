@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+				layout="vertical" title="Editar Capa" creationComplete="centerWindow()" 
+				showCloseButton="true" close="closeWindow()" width="567" borderStyle="solid" borderThickness="0">
+	
+	<mx:HBox width="100%" horizontalGap="329">
+		<mx:Label text="Nome da capa:"/>
+		<mx:CheckBox label="Capa confirmada" id="capaConfirmada" creationComplete="iniciarCheckBoxCapa();"  textAlign="left"/>
+	</mx:HBox>
+	<mx:TextInput width="100%" id="nomeLivro" tabIndex="0" text="{DataGridName.@name}"/>
+	<mx:VBox width="100%" horizontalCenter="0" verticalCenter="0" borderThickness="12">
+		<mx:TitleWindow width="100%" layout="vertical" title="Propriedades da capa" borderStyle="solid" cornerRadius="0">
+			<mx:Label text="Tamanho da capa (em milímetros):"/>
+			<mx:HBox width="100%" label="Adicionar item" height="20">
+				<mx:Label text="Largura:"/>
+				<mx:TextInput id="largura" width="100%" tabIndex="1"  text="{DataGridName.@largura}"/>
+				<mx:Label text="Altura:"/>
+				<mx:TextInput width="100%" tabIndex="2" text="{DataGridName.@altura}" id="altura"/>
+				<mx:Label text="Páginas:"/>
+				<mx:TextInput width="100%" tabIndex="2" text="{DataGridName.@numeroDePaginas}" id="paginas"/>
+			</mx:HBox>
+			<mx:HBox width="100%" label="Adicionar item">
+				<mx:CheckBox label="Espiral" id="checkEspiral" click="funcaoCheckEspiral();" creationComplete="iniciarCheckBox();" />
+				<mx:Label text="Lombada:" height="100%" textAlign="left" id="lombadaLabel"/>
+				<mx:TextInput width="100%" tabIndex="3" text="{DataGridName.@lombada}" id="lombada"/>
+				<mx:Button label="Calcular lombada" click="funcaoCalcularLombadaPopUp(event)" id="botaoLombada"/>
+			</mx:HBox>
+			<mx:Label text="Tamanho da sangria (em milímetros):"/>
+			<mx:HBox width="100%" label="Adicionar item">
+				<mx:Label text="Direita/Esquerda"/>
+				<mx:TextInput width="100%" text="{DataGridName.@dirEsq}" id="sangriaDirEsq"/>
+				<mx:Label text="Inferior/Superior"/>
+				<mx:TextInput width="100%" text="{DataGridName.@infSup}" id="sangriaSupInf"/>
+			</mx:HBox>
+		</mx:TitleWindow>
+		<mx:HBox width="100%">
+			<mx:TitleWindow width="100%" layout="vertical" title="JPG" borderStyle="solid" cornerRadius="0" height="100%">
+				<mx:Label text="Arquivo para a criação da capa:"/>
+				<mx:TextInput width="100%" text="{DataGridName.@capaFile}" id="jpgFile"/>
+				<mx:Button label="Abrir arquivo" width="100%" click="diretorioJPG();"/>
+			</mx:TitleWindow>
+			<mx:TitleWindow width="100%" layout="vertical" title="SELO" borderStyle="solid" cornerRadius="0">
+				<mx:Label text="Arquivo que será importado sobre a capa"/>
+				<mx:TextInput width="100%" text="{DataGridName.@seloPath}" id="seloFile"/>
+				<mx:Button label="Abrir arquivo" width="100%" click="diretorioSELO();"/>
+				<mx:HBox width="100%" label="Adicionar item">
+					<mx:Label text="x:"/>
+					<mx:TextInput width="100%" text="{DataGridName.@seloX}" id="seloX"/>
+					<mx:Label text="y:"/>
+					<mx:TextInput width="100%" text="{DataGridName.@seloY}" id="seloY"/>
+				</mx:HBox>
+			</mx:TitleWindow>
+		</mx:HBox>
+		<mx:HBox width="100%">
+			<mx:TitleWindow width="100%" layout="vertical" title="ISBN" borderStyle="solid" cornerRadius="0">
+				<mx:Label text="ISBN"/>
+				<mx:TextInput width="100%" change="apenasNumerosISBN();" text="{DataGridName.@isbn}" id="isbn" />
+				<mx:Label text="Posição do ISBN no arquivo"/>
+				<mx:HBox width="100%" label="Adicionar item">
+					<mx:Label text="x:"/>
+					<mx:TextInput width="100%" text="{DataGridName.@x}" id="isbnX"/>
+					<mx:Label text="y:"/>
+					<mx:TextInput width="100%" text="{DataGridName.@y}" id="isbnY"/>
+					<mx:Label text="rotação:"/>
+					<mx:TextInput width="100%" text="{DataGridName.@isbnRotacao}" id="isbnRotacao"/>
+				</mx:HBox>
+				<mx:Label text="Cor"/>
+				<mx:HBox width="100%" label="Adicionar item">
+					<mx:Label text="C"/>
+					<mx:TextInput width="100%" text="{DataGridName.@isbnCorC}" id="isbnCorC"/>
+					<mx:Label text="M"/>
+					<mx:TextInput width="100%" text="{DataGridName.@isbnCorM}" id="isbnCorM"/>
+					<mx:Label text="Y"/>
+					<mx:TextInput width="100%" text="{DataGridName.@isbnCorY}" id="isbnCorY"/>
+					<mx:Label text="K"/>
+					<mx:TextInput width="100%" text="{DataGridName.@isbnCorK}" id="isbnCorK"/>
+				</mx:HBox>
+			</mx:TitleWindow>
+			<mx:TitleWindow width="100%" layout="vertical" title="PDF" borderStyle="solid" cornerRadius="0" height="100%">
+				<mx:Label text="Salvar PDF em:"/>
+				<mx:TextInput width="100%" text="{DataGridName.@pdfPath}" id="pdfFile"/>
+				<mx:Button label="Salvar caminho" width="100%" click="diretorioPDF();"/>
+			</mx:TitleWindow>
+		</mx:HBox>
+		<mx:HBox width="100%">
+			<mx:TitleWindow width="100%" layout="vertical" title="Codigo de Barras" borderStyle="solid" cornerRadius="0">
+				<mx:Label text="Código de Barras"/>
+				<mx:TextInput width="100%" change="apenasNumerosEAN();" text="{DataGridName.@ean}" id="ean" />
+				<mx:Label text="Posição do Código de Barras no arquivo"/>
+				<mx:HBox width="100%" label="Adicionar item">
+					<mx:Label text="x:"/>
+					<mx:TextInput width="100%" text="{DataGridName.@x}" id="eanX"/>
+					<mx:Label text="y:"/>
+					<mx:TextInput width="100%" text="{DataGridName.@y}" id="eanY"/>
+					<mx:Label text="rotação:"/>
+					<mx:TextInput width="100%" text="{DataGridName.@eanRotacao}" id="eanRotacao"/>
+				</mx:HBox>
+				<mx:Label text="Cor"/>
+				<mx:HBox width="100%" label="Adicionar item">
+					<mx:Label text="C"/>
+					<mx:TextInput width="100%" text="{DataGridName.@eanCorC}" id="eanCorC"/>
+					<mx:Label text="M"/>
+					<mx:TextInput width="100%" text="{DataGridName.@eanCorM}" id="eanCorM"/>
+					<mx:Label text="Y"/>
+					<mx:TextInput width="100%" text="{DataGridName.@eanCorY}" id="eanCorY"/>
+					<mx:Label text="K"/>
+					<mx:TextInput width="100%" text="{DataGridName.@eanCorK}" id="eanCorK"/>
+				</mx:HBox>
+			</mx:TitleWindow>	
+	   </mx:HBox>	
+			
+		
+		<mx:HBox width="100%" height="100%" textAlign="left" horizontalAlign="right" horizontalGap="20" verticalAlign="middle">
+			<mx:Button label="Salvar" click="saveButton();"/>
+			<mx:Button click="closeWindow();" label="Cancelar"/>
+		</mx:HBox>
+		<mx:RadioButtonGroup id="radiogroup2"/>
+	</mx:VBox>
+	
+	<mx:Script>
+		<![CDATA[
+			import com.adobe.flex.extras.controls.MaskedTextInput;
+			
+			import flash.events.*;
+			import flash.external.ExternalInterface;
+			import flash.net.*;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.HierarchicalData;
+			import mx.controls.*;
+			import mx.controls.Alert;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.*;
+			import mx.managers.*;
+			import mx.managers.PopUpManager;
+			import mx.states.*;
+			
+			[Bindable] public var DataGridName:Object;
+			[Bindable] public var DataGridTemp:DataGrid;
+			[Bindable] public var DataGridNameAC:ArrayCollection;
+			//[Bindable] public var DataGridNameAC:HierarchicalData;
+			
+			public var mainApp:calcularLombadaPopUp = null; 	//will be populated by passed in initobj
+			public var gsMyString:String;							//will be populated by passed in object
+			public var gnMyNumber:Number;
+			
+			private function centerWindow():void {
+				
+				PopUpManager.centerPopUp(this);
+				
+			}
+			
+			private function apenasNumerosISBN():void{
+				
+				var stringTemp:String = isbn.text;
+				var stringOK:String = "";
+				var stringFor:String;
+				
+				var array:Array = stringTemp.split("");
+				
+				//Alert.show(array.length.toString());
+				
+				for(x=0;x<array.length;x++){
+					 
+					stringFor = array[x];
+					
+					if(stringFor == "0" || stringFor == "1" || stringFor == "2" || stringFor == "3" || stringFor == "4" || stringFor == "5" || stringFor == "6" || stringFor == "7" || stringFor == "8" || stringFor == "9")
+					{
+						stringOK = stringOK + stringFor;
+					}
+					
+				}
+				
+				isbn.text = stringOK;
+				centerWindow();
+					
+			}
+			
+			private function apenasNumerosEAN():void{
+				
+				var stringTemp:String = ean.text;
+				var stringOK:String = "";
+				var stringFor:String;
+				
+				var array:Array = stringTemp.split("");
+				
+				//Alert.show(array.length.toString());
+				
+				for(x=0;x<array.length;x++){
+					
+					stringFor = array[x];
+					
+					if(stringFor == "0" || stringFor == "1" || stringFor == "2" || stringFor == "3" || stringFor == "4" || stringFor == "5" || stringFor == "6" || stringFor == "7" || stringFor == "8" || stringFor == "9")
+					{
+						stringOK = stringOK + stringFor;
+					}
+					
+				}
+				
+				ean.text = stringOK;
+				centerWindow();
+				
+			}
+			
+			private function verificaISBN():Boolean{
+				
+				var resposta:Boolean = false;
+				
+				//Alert.show(isbn.text);
+
+				//Confere o dígito verificador do ISBN
+				
+				if(isbn.text != ""){
+					
+					//Verifica se contém 13 dígitos
+					if(isbn.text.split("").length != 13){
+						//Alert.show("ISBN não contém 13 dígitos.\nDigite apenas números.");
+						Alert.show("ISBN não contém 13 dígitos.");
+					}
+					else{
+						
+						var arrayISBN:Array = isbn.text.split("");
+						//Alert.show(arrayISBN.toString());
+						var soma:int = 0;
+						//var somaInicial:int;
+						
+						for(var x:int=0; x < 12; x++){
+							soma = soma + (int(arrayISBN[x]) * 1);
+							x++;
+							soma = soma + (int(arrayISBN[x]) * 3);
+						}
+						/*
+						soma = soma/10;
+						soma = soma+1;
+						soma = soma*10;
+						soma = soma-somaInicial;
+						*/
+						
+						var multiplo10:int = 0;
+						
+						while(soma > multiplo10){
+							multiplo10 = multiplo10 + 10;
+						}
+						
+						soma = multiplo10-soma;
+						
+						//Alert.show(String(somaInicial));
+						//Alert.show("Digito verificador = "+String(soma));
+						
+						//Confere se o último dígito é igual ao resultado do cálculo
+						//Alert.show(String(soma));
+						
+						if(String(soma) == arrayISBN[12]){
+							resposta = true;
+						}
+						else{
+							//Alert.show("ISBN inválido, digite novamente.\nApenas números.");
+							Alert.show("ISBN inválido, digite novamente.");
+							resposta = false;
+						}
+					}
+				}
+				else{
+					resposta = true;
+				}
+				
+				return resposta;
+				
+			}
+			
+			private function verificaEAN():Boolean{
+				
+				var resposta:Boolean = false;
+				
+				//Alert.show(ean.text);
+				
+				//Confere o dígito verificador do ean
+				
+				if(ean.text != ""){
+					
+					//Verifica se contém 13 dígitos
+					if(ean.text.split("").length != 13){
+						//Alert.show("CÓDIGO DE BARRAS não contém 13 dígitos.\nDigite apenas números.");
+						Alert.show("CÓDIGO DE BARRAS não contém 13 dígitos.");
+					}
+					else{
+						
+						var arrayEAN:Array = ean.text.split("");
+						//Alert.show(arrayEAN.toString());
+						var soma:int = 0;
+						//var somaInicial:int;
+						
+						for(var x:int=0; x < 12; x++){
+							soma = soma + (int(arrayEAN[x]) * 1);
+							x++;
+							soma = soma + (int(arrayEAN[x]) * 3);
+						}
+						/*
+						soma = soma/10;
+						soma = soma+1;
+						soma = soma*10;
+						soma = soma-somaInicial;
+						*/
+						
+						var multiplo10:int = 0;
+						
+						while(soma > multiplo10){
+							multiplo10 = multiplo10 + 10;
+						}
+						
+						soma = multiplo10-soma;
+						
+						//Alert.show(String(somaInicial));
+						//Alert.show("Digito verificador = "+String(soma));
+						
+						//Confere se o último dígito é igual ao resultado do cálculo
+						//Alert.show(String(soma));
+						
+						if(String(soma) == arrayEAN[12]){
+							resposta = true;
+						}
+						else{
+							//Alert.show("Código de barras inválido, digite novamente.\nApenas números.");
+							Alert.show("Código de barras inválido, digite novamente.");
+							resposta = false;
+						}
+					}
+				}
+				else{
+					resposta = true;
+				}
+				
+				return resposta;
+				
+			}
+			
+			private function iniciarCheckBoxCapa():void{
+				
+				//capaConfirmada.selected = Boolean(DataGridName.@capaConfirmada);
+				
+				var valorCheck:String = DataGridName.@capaConfirmada; 
+				
+				if(valorCheck == "sim"){
+					capaConfirmada.selected = true;
+				}else{
+					capaConfirmada.selected = false;
+				}
+				
+			}
+			
+			private function iniciarCheckBox():void{
+				
+				var valorCheck:String = DataGridName.@espiral; 
+				
+				if(valorCheck == "sim"){
+					checkEspiral.selected = true;
+					lombada.enabled = false;
+					lombadaLabel.enabled = false;
+					botaoLombada.enabled = false;
+				}else{
+					checkEspiral.selected = false;
+					lombada.enabled = true;
+					lombadaLabel.enabled = true;
+					botaoLombada.enabled = true;
+				}
+			}
+			
+			private function closeWindow():void{
+				
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function diretorioJPG():void{
+				
+				var caminho:String = String(ExternalInterface.call("capturaCaminho","*.jpg"));
+				//Alert.show(caminho);
+				if(caminho != "null"){
+					//dataGridColecao.selectedItem.@capaFile = caminho;
+					jpgFile.text = caminho;
+				}
+				//Alert.show(diretorio);
+			}
+			
+			private function diretorioSELO():void{
+				
+				//var caminho:String = String(ExternalInterface.call("capturaCaminho","*.ai,*.pdf"));
+				var caminho:String = String(ExternalInterface.call("capturaCaminho","*.ai,*.pdf,*.eps,*.indd"));
+				//Alert.show(caminho);
+				if(caminho != "null"){
+					//dataGridColecao.selectedItem.@capaFile = caminho;
+					seloFile.text = caminho;
+				}
+				//Alert.show(diretorio);
+			}
+			
+			private function funcaoCheckEspiral():void{
+				
+				if(checkEspiral.selected == true){
+					lombada.enabled = false;
+					lombadaLabel.enabled = false;
+					botaoLombada.enabled = false;
+				}else{
+					lombada.enabled = true;
+					lombadaLabel.enabled = true;
+					botaoLombada.enabled = true;
+				}
+			}
+			
+			private function diretorioPDF():void{
+				
+				var caminho:String = String(ExternalInterface.call("capturaCaminho","*.pdf"));
+				//Alert.show(caminho);
+				if(caminho != "null"){
+					//dataGridColecao.selectedItem.@pdfPath = caminho;
+					pdfFile.text = caminho;
+				}
+				//Alert.show(diretorio);
+			}
+			
+			public var editNameWindow02:IFlexDisplayObject;
+			public var myPopUp02:calcularLombadaPopUp;
+			
+			public function funcaoCalcularLombadaPopUp(event:MouseEvent):void{
+				/*
+				// show the popup
+				//editNameWindow02 = PopUpManager.createPopUp(this, calcularLombadaPopUp, true);
+				editNameWindow02 = PopUpManager.createPopUp(this, calcularLombadaPopUp, true);
+				
+				
+				// cast to a nameEditorPopup
+				myPopUp02 = calcularLombadaPopUp(editNameWindow02);
+
+				//myPopUp02.lombadaPaginas.text = "00";
+				myPopUp02.lombadaPaginas.text  = paginas.text;
+				
+				*/
+				
+				var titleWindowInstance:calcularLombadaPopUp = calcularLombadaPopUp(PopUpManager.createPopUp(this,calcularLombadaPopUp,false));
+				
+				titleWindowInstance.mainApp = this; 
+				
+				titleWindowInstance.lombadaPaginas.text = paginas.text;
+
+				
+			}
+			
+			private function saveButton():void{
+				
+				if(verificaISBN()){
+				
+					// update the name
+					DataGridName.@name = nomeLivro.text;
+					DataGridName.@largura = largura.text;
+					DataGridName.@altura = altura.text;
+					DataGridName.@capaConfirmada = capaConfirmada.selected;
+					
+					//DataGridName.@espiral = checkEspiral.selected;
+					//DataGridName.@lombada = lombada.text;
+					
+					//Não permite vírgula nos campos
+					var todosCampos:String = largura.text + altura.text + lombada.text + sangriaDirEsq.text + sangriaSupInf.text + seloFile.text + seloX.text +seloY.text +isbnRotacao.text+isbnCorC.text+isbnCorM.text+ isbnCorY.text+isbnCorK.text+isbn.text+isbnX.text+isbnY.text+jpgFile.text+pdfFile.text;
+					var array:Array = todosCampos.split(",");
+					//Alert.show(array.length.toString());
+					
+					if(array.length > 1){
+						
+						Alert.show("Utilize ponto (.) ao invés de vírgula (,).");
+					}
+					else{
+						
+						//Se for uma pasta, ignora o 
+						var stringVerificaPasta:String = largura.text + altura.text;
+						if(stringVerificaPasta != ""){
+							
+							if(capaConfirmada.selected == true){
+								DataGridName.@capaConfirmada = "sim";
+							}
+							else{
+								DataGridName.@capaConfirmada = "não";
+							}
+						
+							if(checkEspiral.selected == true){
+								DataGridName.@espiral = "sim";
+								DataGridName.@lombada = "";
+							}
+							else{
+								DataGridName.@espiral = "não";
+								DataGridName.@lombada = lombada.text;
+							}
+						}
+						else{
+							DataGridName.@espiral = "";
+							DataGridName.@lombada = "";
+							DataGridName.@capaConfirmada = "";
+						}
+						DataGridName.@numeroDePaginas = paginas.text;
+						
+						DataGridName.@dirEsq = sangriaDirEsq.text;
+						DataGridName.@infSup = sangriaSupInf.text;
+						
+						DataGridName.@seloPath = seloFile.text;
+						DataGridName.@seloX = seloX.text;
+						DataGridName.@seloY = seloY.text;
+						DataGridName.@isbnRotacao = isbnRotacao.text;
+						DataGridName.@isbnCorC = isbnCorC.text;
+						DataGridName.@isbnCorM = isbnCorM.text;
+						DataGridName.@isbnCorY = isbnCorY.text;
+						DataGridName.@isbnCorK = isbnCorK.text;
+	
+						DataGridName.@isbn = isbn.text;
+						DataGridName.@x = isbnX.text;
+						DataGridName.@y = isbnY.text;
+						DataGridName.@capaFile = jpgFile.text;
+						DataGridName.@pdfPath = pdfFile.text;
+		
+						// update the array collection
+						DataGridNameAC.itemUpdated(DataGridName);
+						
+						// close the window
+						closeWindow();
+						}
+				}
+			}
+			
+		]]>
+	</mx:Script>
+</mx:TitleWindow>

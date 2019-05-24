@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"	creationComplete="initComponent()" showCloseButton="true"
+				close="closeWindow()">
+	
+	<mx:Script><![CDATA[
+		import mx.managers.PopUpManager;
+		import mx.collections.ArrayCollection;
+		
+		[Bindable]public var mainApp:Object = null;  
+		[Bindable]public var gsMyString:String;       
+		[Bindable]public var gnMyNumber:Number;       
+		[Bindable]public var acItemsSelected:ArrayCollection;
+		
+		//not really used by anything in this example, but its just my habit
+		private function initComponent():void
+		{
+			
+		}
+		
+		//called by the close event raised byclicking the close button
+		private function closeWindow():void
+		{
+			PopUpManager.removePopUp(this);
+		}//closeWindow
+		
+		//called by the change event of the datagrid
+		private function showFinalSelection(oEvent:Event):void
+		{
+			mainApp.tiFinalSelection.text = oEvent.target.selectedItem.album;
+		}//showFinalSelection
+		
+	]]></mx:Script>
+	<mx:Text text="The data grid below shows the selectedItems in the data grid in the Main app. This dataProvider is bound to a local variable which is set by Main App datagrid itemClick.&#13;&#13;Select additional items(ctrl-click) in Main App, they will display here.&#13;&#13;Select an item here. It will display in Main App 'Final Selection' control." width="300" />
+	<mx:DataGrid id="dg2" rowCount="3"
+				 dataProvider="{mainApp.acItemsSelected}"
+				 change="showFinalSelection(event)" > 
+		<mx:columns>
+			<mx:Array>
+				<mx:DataGridColumn headerText="Artist" dataField="artist" />
+				<mx:DataGridColumn headerText="Price" dataField="price" editable="true"/>
+				<mx:DataGridColumn headerText="Album" dataField="album" />
+			</mx:Array>
+		</mx:columns>    
+	</mx:DataGrid>
+	
+	<mx:HBox >
+		<mx:Label id="lblMyNumber" text="{gnMyNumber}"  width="100"/>
+		<mx:Text text="Bound to local variable set at pop-up.&#13;Changes to Main App control do NOT change this" width="200" />
+	</mx:HBox>
+	<mx:HBox >
+		<mx:Label text="{mainApp.gsBindMe}"  width="100"/>
+		<mx:Text text="Bound to mainApp local variable via passed in reference.&#13;Changes in Main App DO change this." width="200"  />
+	</mx:HBox>  
+	
+</mx:TitleWindow>

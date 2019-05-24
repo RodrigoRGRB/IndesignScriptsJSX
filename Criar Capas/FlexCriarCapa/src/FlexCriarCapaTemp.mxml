@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" initialize="init01()" creationComplete="init02()" viewSourceURL="srcview/index.html">
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.external.ExternalInterface;
+			
+			import mx.charts.chartClasses.InstanceCache;
+			import mx.collections.ArrayCollection;
+			import mx.collections.HierarchicalData;
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.controls.Alert;
+			import mx.controls.DataGrid;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IUIComponent;
+			import mx.events.CloseEvent;
+			import mx.events.DragEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.TreeEvent;
+			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
+			import mx.messaging.messages.ErrorMessage;
+			import mx.utils.ArrayUtil;
+			
+			
+			
+			
+			[Bindable] private var arquivoXML:XML;
+			[Bindable] private var listaXML:XMLList;
+			
+			private var numeroDeCapas:int;
+			
+			private var stringIndesign:String;
+			
+			[Bindable]
+			private var companyHierarchy:HierarchicalData;
+			
+			private var companyData:XML;
+			
+			public function init01():void{
+				arquivoXML = capturaXML();
+			}
+			
+			public function capturaXML():XML{
+				
+				function xmlLoaded( event:Event ):void{
+					var xmlTemp:XML = XML(event.target.data.toString());
+					//Alert.show(xmlTemp.toString());
+					arquivoXML = xmlTemp;
+				}
+				function loadXML( url:String ):void{
+					var loader:URLLoader = new URLLoader();
+					loader.addEventListener(Event.COMPLETE, xmlLoaded);
+					loader.load(new URLRequest(url));
+				}
+				loadXML("arquivos/colecoes.xml");
+				
+				return arquivoXML;	
+			}
+			
+			private function init02():void
+			{	
+				
+				companyData = arquivoXML;
+				companyHierarchy = new HierarchicalData(companyData.capa);
+				
+			}
+			
+			private function exibeDados():void{
+				
+				if(capaFileColuna.visible==true){
+					//grupoSangria.visible=false;
+					//grupoSelo.visible=false;
+					//grupoISBN.visible=false;
+					capaFileColuna.visible=false;
+					pdfFileColuna.visible=false;
+				}else{
+					//grupoSangria.visible=true;
+					//grupoSelo.visible=true;
+					//grupoISBN.visible=true;
+					capaFileColuna.visible=true;
+					pdfFileColuna.visible=true;
+				}
+			}
+			
+			public var editNameWindow:IFlexDisplayObject;
+			
+			public var myPopUp:nameEditorPopUp;
+			
+			public function duplicaItem(event:MouseEvent):void
+			{
+				var stringXML:String = "<capa name='"+dataGridColecao.selectedItem.@name+
+					"(2)' largura='"+
+					dataGridColecao.selectedItem.@largura+
+					"' altura='"+
+					dataGridColecao.selectedItem.@altura+
+					"' lombada='"+
+					dataGridColecao.selectedItem.@lombada+
+					"' dirEsq='"+
+					dataGridColecao.selectedItem.@dirEsq+
+					"' infSup='"+
+					dataGridColecao.selectedItem.@infSup+
+					"' isbn='"+
+					dataGridColecao.selectedItem.@isbn+
+					"' x='"+
+					dataGridColecao.selectedItem.@x+
+					"' y='"+
+					dataGridColecao.selectedItem.@y+
+					"' isbnCorC='"+
+					dataGridColecao.selectedItem.@isbnCorC+
+					"' isbnCorM='"+
+					dataGridColecao.selectedItem.@isbnCorM+
+					"' isbnCorY='"+
+					dataGridColecao.selectedItem.@isbnCorY+
+					"' isbnCorK='"+
+					dataGridColecao.selectedItem.@isbnCorK+
+					"' isbnRotacao='"+
+					dataGridColecao.selectedItem.@isbnRotacao+
+					"' seloPath='"+
+					dataGridColecao.selectedItem.@seloPath+
+					"' seloX='"+
+					dataGridColecao.selectedItem.@seloX+
+					"' seloY='"+
+					dataGridColecao.selectedItem.@seloY+
+					"' capaFile='"+
+					dataGridColecao.selectedItem.@capaFile+
+					"' pdfPath='"+
+					dataGridColecao.selectedItem.@pdfPath+
+					"' espiral='"+
+					dataGridColecao.selectedItem.@espiral+
+					"' capaConfirmada='"+
+					dataGridColecao.selectedItem.@capaConfirmada+
+					"' NumeroDePaginas='"+
+					dataGridColecao.selectedItem.@numeroDePaginas+
+					"'/>";
+				
+				//Alert.show(stringXML);
+				
+				var nodeTemp:XML = XML(stringXML);
+				companyData = arquivoXML;
+				
+				dataGridColecao.selectedItem.parent().appendChild(nodeTemp);
+				//dataGridColecao.selectedItem.appendChild(nodeTemp);
+				
+			}
+			
+			public function adicionaItem(event:MouseEvent):void
+			{
+				
+				//adiciona linha
+				var nodeTemp:XML = XML("<capa name='Novo item'/>");
+				companyData = arquivoXML;
+				dataGridColecao.selectedItem.appendChild(nodeTemp);
+				
+				/*
+				// show the popup
+				editNameWindow=PopUpManager.createPopUp(this, nameEditorPopUp, true);
+				
+				// cast to a nameEditorPopup
+				myPopUp = nameEditorPopUp(editNameWindow);
+				*/
+				
+			}
+			
+			public function showPopUp(event:MouseEvent):void{
+				
+				// show the popup
+				editNameWindow=PopUpManager.createPopUp(this, nameEditorPopUp, true);
+				
+				// cast to a nameEditorPopup
+				myPopUp = nameEditorPopUp(editNameWindow);	
+				
+				// pass the popUp my DataGrid Item
+				myPopUp.DataGridName = dataGridColecao.selectedItem;
+				var array1:Array = ArrayUtil.toArray(companyHierarchy);
+				myPopUp.DataGridNameAC = new ArrayCollection( array1 );
+				
+			}
+			
+			
+			
+			public function gerarCapa():void{
+				
+				var itemSelecionado:String = String(dataGridColecao.selectedItem); 
+				//Alert.show(itemSelecionado);
+				//Algum dado foi selecionado
+				//if(itemSelecionado != "null" && dataGridColecao.selectedItem.@largura != "" && dataGridColecao.selectedItem.@altura != "" && dataGridColecao.selectedItem.@capaFile != ""){
+				if(itemSelecionado != "null"){
+					
+					var myArray:Array = new Array();
+					
+					//Alert.show("Foi selecionado");
+					
+					function AdicionaCamposArray(nodeTemp:XML):void{
+						
+						//Adiciona toda a árvore de nós acima dele ao nome
+						var stringNomeCompleto:String;
+						
+						stringNomeCompleto = nodeTemp.@name;
+						
+						function constroiNome(nodeTempNome:XML):void{
+							
+							//Alert.show(nodeTemp.parent().parent().@name);
+							try{
+								if(nodeTemp.parent().@name != ""){
+									
+									stringNomeCompleto = nodeTempNome.parent().@name + " > " + stringNomeCompleto;
+									constroiNome(nodeTempNome.parent());
+								}
+							}
+							catch(e){
+							}
+						}
+						
+						//myArray.push(nodeTemp.@name);
+						
+						constroiNome(nodeTemp);
+						//Alert.show(stringNomeCompleto);
+						myArray.push(stringNomeCompleto);	
+						
+						myArray.push(nodeTemp.@largura);
+						myArray.push(nodeTemp.@altura);
+						myArray.push(nodeTemp.@espiral);
+						var lombada:String;
+						
+						if(nodeTemp.@lombada == ""){
+							lombada = "0";	
+						}
+						else{
+							lombada = nodeTemp.@lombada;
+						}
+						
+						myArray.push(lombada);
+						
+						
+						myArray.push(nodeTemp.@dirEsq);
+						myArray.push(nodeTemp.@infSup);
+						myArray.push(nodeTemp.@isbn);
+						myArray.push(nodeTemp.@x);
+						myArray.push(nodeTemp.@y);
+						myArray.push(nodeTemp.@capaFile);
+						myArray.push(nodeTemp.@pdfPath);
+						
+						myArray.push(nodeTemp.@isbnCorC);
+						myArray.push(nodeTemp.@isbnCorM);
+						myArray.push(nodeTemp.@isbnCorY);
+						myArray.push(nodeTemp.@isbnCorK);
+						myArray.push(nodeTemp.@isbnRotacao);
+						myArray.push(nodeTemp.@seloPath);
+						myArray.push(nodeTemp.@seloX);
+						myArray.push(nodeTemp.@seloY);  
+					}
+					
+					if(dataGridColecao.selectedItem.@largura != "" && dataGridColecao.selectedItem.@altura != "" && dataGridColecao.selectedItem.@dirEsq != "" && dataGridColecao.selectedItem.@infSup != ""){
+						
+						if(dataGridColecao.selectedItem.@capaConfirmada == "sim"){
+							
+							AdicionaCamposArray(XML(dataGridColecao.selectedItem));
+							
+							numeroDeCapas = 1;
+							
+							stringIndesign = fechaIndesign.selected.toString();
+							
+							//ExternalInterface.call("gerarCapa",name, largura, altura, lombada, sangriaDirEsq, sangriaSupInf, isbnNum, isbnX, isbnY,jpgFile,pdfFile,stringIndesign,isbnCorC,isbnCorM,isbnCorY,isbnCorK,isbnRotacao,seloPath,seloX,seloY,espiral);
+							ExternalInterface.call("gerarCapa",numeroDeCapas,myArray.toString(),stringIndesign);
+						}
+					}
+					else{
+						
+						//Cria um array de todos os nós válidos como capas
+						var contadorCapas:int = 0;
+						var myXML:XML = XML(dataGridColecao.selectedItem);
+						
+						function extraiNo(xmlTemp:XML):void{ 
+							for each( var node:XML in xmlTemp.elements() ) {
+								
+								//Verifica se existe subnós
+								//Se capa for confirmada, adiciona ao array
+								var stringTemp:String = String(node.@largura);
+								var stringTempCapa:String = String(node.@capaConfirmada);
+								
+								if(stringTemp == ""){
+									//Alert.show(node.@name);
+									extraiNo(XML(node));
+								}
+								else {
+									if(stringTempCapa == "sim"){
+										//Alert.show(node.@name);
+										contadorCapas++
+											AdicionaCamposArray(node);
+										//myArray.push(node.@name.toString());
+									}
+								}
+							}
+						}
+						
+						extraiNo(myXML);
+						
+						//Alert.show("Números de capas" + contadorCapas.toString());
+						//Alert.show(myArray.toString());
+						//Alert.show("Dados insuficientes para gerar a capa.\nSelecione uma capa válida.");
+						
+						numeroDeCapas = contadorCapas;
+						
+						stringIndesign = fechaIndesign.selected.toString();
+						
+						//function clickHandler(evt:Event):void {
+						
+						//}
+						
+						// Event handler function for displaying the selected Alert button.
+						function alertClickHandler(evt:CloseEvent):void {
+							if (evt.detail == Alert.YES) {
+								ExternalInterface.call("gerarCapa",numeroDeCapas,myArray.toString(),stringIndesign);
+								//status.text = "You answered Yes";
+							} else {
+								//status.text = "You answered No";
+							}
+						}
+						
+						//Alert.show(numeroDeCapas.toString());
+						
+						if(numeroDeCapas > 1){
+							Alert.show("Deseja gerar as "+numeroDeCapas +" capas selecionadas?", "Gerar capas", Alert.YES|Alert.NO, this, alertClickHandler);
+						}
+						else if(numeroDeCapas == 1){
+							//else{
+							Alert.show("Deseja gerar a subcapa selecionada?", "Gerar capas", Alert.YES|Alert.NO, this, alertClickHandler);
+						}
+						else{
+							Alert.show("Nenhuma capa selecionada.");
+						}
+						
+						
+						//clickHandler(event);
+						
+						//Fim cria um array de todos os nós válidos como capas
+						
+					}
+					
+				}
+					
+				else{
+					Alert.show("Dados insuficientes para gerar a capa.\nSelecione uma capa válida.");
+				}
+				
+				
+				
+			}
+			
+			public function salvarXML():void{
+				//Alert.show(companyData);
+				
+				
+				var xmlString:String = companyData;
+				
+				//xmlString = "<data>"+xmlString+"</data>";
+				
+				var stringTemp:String = String(ExternalInterface.call("salvarXML",xmlString));
+				Alert.show(stringTemp);
+				
+				
+			}
+			
+			// Função para apagar item
+			private function image_dragEnter(evt:DragEvent):void {
+				var obj:IUIComponent = IUIComponent(evt.currentTarget);
+				DragManager.acceptDragDrop(obj);
+			}
+			public function apagarItem():void{
+				
+				var node:XML = XML(dataGridColecao.selectedItem);
+				//Alert.show(node.toString());
+				
+				var children:XMLList = XMLList(node.parent()).children();
+				for (var i:Number=0; i < children.length(); i++) {
+					if ( children[i].@name == node.@name ) {
+						delete children[i];
+					}
+				}
+				
+			}
+			private function image_dragDrop(evt:DragEvent):void {
+				var node:XML = XML(dataGridColecao.selectedItem);
+				//Alert.show(node.toString());
+				
+				var children:XMLList = XMLList(node.parent()).children();
+				for (var i:Number=0; i < children.length(); i++) {
+					if ( children[i].@name == node.@name ) {
+						delete children[i];
+					}
+				}
+				// Fim da função para apagar item
+				
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox width="100%" borderStyle="solid" borderThickness="0" horizontalAlign="right">
+		<mx:CheckBox label="Fechar Indesign temporário" selected="true" id="fechaIndesign"/>
+		<mx:CheckBox label="Exibir dados" click="exibeDados()"/>
+	</mx:HBox>
+	
+	
+	<mx:AdvancedDataGrid id="dataGridColecao" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" doubleClick="showPopUp(event)" doubleClickEnabled="true" dataProvider="{companyHierarchy}" width="100%" height="100%" borderStyle="solid" borderThickness="5" backgroundColor="#FFFFFF">
+		
+		<mx:groupedColumns>
+			<mx:AdvancedDataGridColumn dataField="@name" id="colecaoColuna" headerText="Coleção"/>
+			<mx:AdvancedDataGridColumn dataField="@capaConfirmada" headerText="Confirmada" width="100"/>
+			<mx:AdvancedDataGridColumn dataField="@largura" headerText="Largura" width="75"/>
+			<mx:AdvancedDataGridColumn dataField="@altura" headerText="Altura" width="75"/>
+			<mx:AdvancedDataGridColumn dataField="@espiral" headerText="Espiral" width="75"/>
+			<mx:AdvancedDataGridColumn dataField="@numeroDePaginas" headerText="Páginas" visible="true" width="75"/>
+			<mx:AdvancedDataGridColumn dataField="@lombada" headerText="Lombada" width="80"/>
+			
+			<mx:AdvancedDataGridColumnGroup visible="false" id="grupoSangria" headerText="Sangria" textAlign="center">
+				<mx:AdvancedDataGridColumn dataField="@dirEsq" headerText="Dir/Esq" width="75"/>
+				<mx:AdvancedDataGridColumn dataField="@infSup" headerText="Inf/Sup" width="75"/>
+			</mx:AdvancedDataGridColumnGroup>
+			
+			<mx:AdvancedDataGridColumnGroup visible="false" id="grupoSelo" headerText="Sangria" textAlign="center">
+				<mx:AdvancedDataGridColumn dataField="@seloPath" headerText="Selo" width="75"/>
+				<mx:AdvancedDataGridColumn dataField="@seloX" headerText="x" width="75"/>
+				<mx:AdvancedDataGridColumn dataField="@seloY" headerText="x" width="75"/>
+			</mx:AdvancedDataGridColumnGroup>
+			
+			<mx:AdvancedDataGridColumn dataField="@isbn" headerText="ISBN" width="110"/>
+			
+			<mx:AdvancedDataGridColumnGroup visible="false" id="grupoISBN" headerText="ISBN" textAlign="center">
+				<mx:AdvancedDataGridColumn dataField="@x" headerText="X" width="40"/>
+				<mx:AdvancedDataGridColumn dataField="@y" headerText="Y" width="40"/>
+				<mx:AdvancedDataGridColumn dataField="@isbnCorC" headerText="C" width="40"/>
+				<mx:AdvancedDataGridColumn dataField="@isbnCorM" headerText="M" width="40"/>
+				<mx:AdvancedDataGridColumn dataField="@isbnCorY" headerText="Y" width="40"/>
+				<mx:AdvancedDataGridColumn dataField="@isbnCorK" headerText="K" width="40"/>
+				<mx:AdvancedDataGridColumn dataField="@isbnRotacao" headerText="Rotação" width="40"/>
+			</mx:AdvancedDataGridColumnGroup>
+			
+			<mx:AdvancedDataGridColumn dataField="@capaFile" id="capaFileColuna" visible="false" headerText="JPG" width="75"/>
+			<mx:AdvancedDataGridColumn dataField="@pdfPath" id="pdfFileColuna" visible="false" headerText="PDF" width="75"/>
+			
+		</mx:groupedColumns>
+	</mx:AdvancedDataGrid> 
+	<mx:HBox  width="100%" horizontalGap="28" textAlign="right" horizontalAlign="right">
+		<mx:ControlBar horizontalAlign="right">
+			<mx:Image click="apagarItem();" id="image"
+					  source="arquivos/lixeira.png"
+					  dragDrop="image_dragDrop(event);"
+					  dragEnter="image_dragEnter(event);" />
+		</mx:ControlBar>
+		
+		<mx:Button label="Adicionar" click="adicionaItem(event)" height="40"/>
+		<mx:Button label="Duplicar" click="duplicaItem(event)" height="40"/>
+		<mx:Button label="Editar" click="showPopUp(event)" height="40"/>
+		<mx:Button label="Salvar aquivo" width="150" height="40" click="salvarXML()"/>
+		<mx:Button label="Gerar capa" click="gerarCapa()" width="150" height="40"/>
+	</mx:HBox>
+	
+	
+</mx:Application>

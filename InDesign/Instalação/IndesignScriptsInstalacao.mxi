@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macromedia-extension
+name="Poliedro Scripts"
+version="0.1"
+type="component"
+requires-restart="false">
+<author name="Lucas Ribeiro" />
+<products>
+<product name="Indesign" version="7" primary="true" />
+</products>
+<description>
+<![CDATA[Menu Poliedro Scripts.]]>
+</description>
+
+<!-- Describe where the extension shows in the UI of the product -->
+
+<ui-access>
+<![CDATA[
+
+Para criar o menu "Poliedro Scripts", abra o Indesign e aperte Crtl+Alt+F11.
+Em seguida clique no link "construir menu".
+Para executar os scripts acesse o menu "Poliedro Scripts" na barra superior.
+
+]]>
+
+</ui-access>
+
+<!-- Describe the files that comprise the extension -->
+
+<files>
+<file name="Scripts Poliedro.lnk" destination="$indesign/Scripts/Scripts Panel" />
+
+
+</files>
+
+</macromedia-extension>

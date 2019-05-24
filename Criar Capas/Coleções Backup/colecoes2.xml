@@ -1,0 +1,19 @@
+<colecao name="Ensino Médio">
+  <ano name="2010">
+    <disciplina name="Matemática">
+      <capa name="Livro 1" largura="210" altura="280" lombada="12" dirEsq="10" infSup="5" isbnFile="C:" isbnLayer="LayerEnsinoMédio" x="105" y="255" capaFile="C:01.jpg" pdfPath="Atual/123.pdf"/>
+    </disciplina>
+  </ano>
+  <ano name="2009">
+    <disciplina name="Matemática">
+      <capa name="Livro 1" largura="210" altura="280" lombada="12" dirEsq="10" infSup="5" isbnFile="C:" isbnLayer="LayerEnsinoMédio" x="105" y="255" capaFile="C:01.jpg" pdfPath="Atual/123.pdf"/>
+    </disciplina>
+  </ano>
+</colecao>
+<colecao name="Ensino Fundamental50" largura="" altura="" lombada="" dirEsq="" infSup="" isbnFile="" isbnLayer="" x="" y="" capaFile="" pdfPath="">
+  <ano name="2010">
+    <disciplina name="Matemática">
+      <capa name="Livro 1" largura="210" altura="280" lombada="12" dirEsq="10" infSup="5" isbnFile="/M/2011/ISBN e Ficha Catalográfica/Código de barras/Ensino Médio.ai" isbnLayer="LayerEnsinoMédio" x="105" y="255" capaFile="/M/2011/Capas/Capas EM_2011/Arquivos abertos/CapaEM2011_21x28_BiologiaL1.jpg" pdfPath="Atual/123.pdf"/>
+    </disciplina>
+  </ano>
+</colecao>
